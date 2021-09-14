@@ -966,22 +966,22 @@ _main:
 	ljmp	00151$
 ;	main.c:205: case 0x09:
 00118$:
-;	main.c:206: UEP1_CTRL = (1 << 4) | (1 << 1);
+;	main.c:206: UEP1_CTRL = (1 << 4) | (1 << 1);	//Config EP1. Disable sending Data
 	mov	_UEP1_CTRL,#0x12
-;	main.c:207: UEP4_1_MOD |= (1 << 7);
+;	main.c:207: UEP4_1_MOD |= (1 << 7);				//Receiving Data is Enabled
 	orl	_UEP4_1_MOD,#0x80
-;	main.c:208: UEP4_1_MOD &= ~(1 << 6);
+;	main.c:208: UEP4_1_MOD &= ~(1 << 6);			//Sending Data is Disabled
 	anl	_UEP4_1_MOD,#0xbf
-;	main.c:209: UEP1_DMA = (uint16_t)u8Ep1Buff;
+;	main.c:209: UEP1_DMA = (uint16_t)u8Ep1Buff;		//Assign data for Ep1Buffer
 	mov	((_UEP1_DMA >> 0) & 0xFF),#_u8Ep1Buff
 	mov	((_UEP1_DMA >> 8) & 0xFF),#(_u8Ep1Buff >> 8)
-;	main.c:211: UEP2_CTRL = (1 << 4) | (1 << 3) | (1 << 1);
+;	main.c:211: UEP2_CTRL = (1 << 4) | (1 << 3) | (1 << 1);		//Config EP1. Enable sending Data
 	mov	_UEP2_CTRL,#0x1a
-;	main.c:212: UEP2_3_MOD |= (1 << 2);
+;	main.c:212: UEP2_3_MOD |= (1 << 2);							//Tx Enabled
 	orl	_UEP2_3_MOD,#0x04
-;	main.c:213: UEP2_3_MOD &= ~(1 << 3);
+;	main.c:213: UEP2_3_MOD &= ~(1 << 3);						//Rx Disabled
 	anl	_UEP2_3_MOD,#0xf7
-;	main.c:214: UEP2_DMA = (uint16_t)u8Ep2Buff;
+;	main.c:214: UEP2_DMA = (uint16_t)u8Ep2Buff;					//Assign data for Ep1Buffer
 	mov	((_UEP2_DMA >> 0) & 0xFF),#_u8Ep2Buff
 	mov	((_UEP2_DMA >> 8) & 0xFF),#(_u8Ep2Buff >> 8)
 ;	main.c:215: u8ControlState = STATUS_STATE;
@@ -1036,7 +1036,7 @@ _main:
 	mov	r7,#0x00
 	cjne	r6,#0x01,00147$
 	cjne	r7,#0x00,00147$
-;	main.c:241: if (u8Ep1Buff[0] == 1) {
+;	main.c:241: if (u8Ep1Buff[0] == 1) {//Check data
 	mov	dptr,#_u8Ep1Buff
 	movx	a,@dptr
 	mov	r7,a
@@ -1061,52 +1061,68 @@ _main:
 ;	main.c:247: P1_4 = 0;
 ;	assignBit
 	clr	_P1_4
-;	main.c:248: u8Ep2Buff[0] = 0x14;
+;	main.c:248: u8Ep2Buff[0] = 0x14;	//Send Data to EP2
 	mov	dptr,#_u8Ep2Buff
 	mov	a,#0x14
 	movx	@dptr,a
-;	main.c:249: u8Ep2Buff[1] = 0x12;
+;	main.c:249: u8Ep2Buff[1] = 0x12;	//Send Data to EP2
 	mov	dptr,#(_u8Ep2Buff + 0x0001)
 	mov	a,#0x12
 	movx	@dptr,a
-;	main.c:250: u8Ep2Buff[2] = 0x19;
+;	main.c:250: u8Ep2Buff[2] = 0x19;	//Send Data to EP2
 	mov	dptr,#(_u8Ep2Buff + 0x0002)
 	mov	a,#0x19
 	movx	@dptr,a
-;	main.c:251: u8Ep2Buff[3] = 0x90;
+;	main.c:251: u8Ep2Buff[3] = 0x90;	//Send Data to EP2
 	mov	dptr,#(_u8Ep2Buff + 0x0003)
 	mov	a,#0x90
 	movx	@dptr,a
-;	main.c:252: UEP2_T_LEN = 0x40;
+;	main.c:252: u8Ep2Buff[4] = 0x05;	//Send Data to EP2
+	mov	dptr,#(_u8Ep2Buff + 0x0004)
+	mov	a,#0x05
+	movx	@dptr,a
+;	main.c:253: u8Ep2Buff[5] = 0x02;	//Send Data to EP2
+	mov	dptr,#(_u8Ep2Buff + 0x0005)
+	mov	a,#0x02
+	movx	@dptr,a
+;	main.c:254: u8Ep2Buff[6] = 0x19;	//Send Data to EP2
+	mov	dptr,#(_u8Ep2Buff + 0x0006)
+	mov	a,#0x19
+	movx	@dptr,a
+;	main.c:255: u8Ep2Buff[7] = 0x90;	//Send Data to EP2
+	mov	dptr,#(_u8Ep2Buff + 0x0007)
+	mov	a,#0x90
+	movx	@dptr,a
+;	main.c:256: UEP2_T_LEN = 0x40;		//Length of sending data: 64 bytes
 	mov	_UEP2_T_LEN,#0x40
-;	main.c:253: tmp = UEP2_CTRL;
+;	main.c:257: tmp = UEP2_CTRL;		//Status of EP2
 	mov	a,_UEP2_CTRL
-;	main.c:254: tmp &= ~(1 << 1);
-;	main.c:255: tmp &= ~(1 << 0);
+;	main.c:258: tmp &= ~(1 << 1);		//Turn on Send data
+;	main.c:259: tmp &= ~(1 << 0);		//Turn on Send data
 	anl	a,#(0xfd&0xfe)
 	mov	_UEP2_CTRL,a
-;	main.c:256: UEP2_CTRL = tmp;
+;	main.c:260: UEP2_CTRL = tmp;
 	sjmp	00151$
 00147$:
-;	main.c:258: } else if ((USB_INT_ST & 0x0F) == 0x02) {
+;	main.c:262: } else if ((USB_INT_ST & 0x0F) == 0x02) {
 	mov	r6,_USB_INT_ST
 	anl	ar6,#0x0f
 	mov	r7,#0x00
 	cjne	r6,#0x02,00151$
 	cjne	r7,#0x00,00151$
-;	main.c:260: tmp = UEP2_CTRL;
+;	main.c:264: tmp = UEP2_CTRL;
 	mov	a,_UEP2_CTRL
-;	main.c:261: tmp |= (1 << 1);
+;	main.c:265: tmp |= (1 << 1);			//Turn off Send data
 	orl	a,#0x02
-;	main.c:262: tmp &= ~(1 << 0);
+;	main.c:266: tmp &= ~(1 << 0);			//Turn off Send data
 	anl	a,#0xfe
 	mov	_UEP2_CTRL,a
-;	main.c:263: UEP2_CTRL = tmp;
+;	main.c:267: UEP2_CTRL = tmp;
 00151$:
-;	main.c:265: UIF_TRANSFER = 0;
+;	main.c:269: UIF_TRANSFER = 0;
 ;	assignBit
 	clr	_UIF_TRANSFER
-;	main.c:268: }
+;	main.c:272: }
 	ljmp	00155$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)

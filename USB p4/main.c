@@ -45,24 +45,24 @@ void send(uint8_t u8Data)
 }
 
 const uint8_t u8DeviceDescriptor[] = {
-	0x12, /* 0 */
-	0x01, /* 1 */
-	0x00, /* 2 */
-	0x00, /* 3 */
-	0xff, /* 4 */
-	0x00, /* 5 */
-	0x00, /* 6 */
-	0x40, /* 7 */
-	0x34, /* 8 */
-	0x12, /* 9 */
-	0x78, /* 10 */
-	0x56, /* 11 */
-	0x00, /* 12 */
-	0x00, /* 13 */
-	0x00, /* 14 */
-	0x00, /* 15 */
-	0x00, /* 16 */
-	0x01 /* 17 */
+	0x12, /* 0 */	//Size of the Descriptor in Bytes 0x12 (18 bytes)
+	0x01, /* 1 */	//Device Descriptor (0x01)
+	0x00, /* 2 */	//USB Specification Number which device complies too. 0xJJMN USB2.0 0x0200, USB1.1 0x0110, USB1.0 0x0100
+	0x00, /* 3 */	//USB Specification Number which device complies too. 0xJJMN USB2.0 0x0200, USB1.1 0x0110, USB1.0 0x0100
+	0xff, /* 4 */	//Class Code: HID, CDC...
+	0x00, /* 5 */	//Subclass Code (Assigned by USB Org)
+	0x00, /* 6 */	//Protocol Code (Assigned by USB Org)
+	0x40, /* 7 */	//Maximum Packet Size for Zero Endpoint. Valid Sizes are 8, 16, 32, 64. 0x40 64 bytes.
+	0x34, /* 8 */	//Vendor ID (Assigned by USB Org) Low
+	0x12, /* 9 */	//Vendor ID (Assigned by USB Org) High
+	0x78, /* 10 */	//Product ID (Assigned by Manufacturer) Low
+	0x56, /* 11 */	//Product ID (Assigned by Manufacturer) High
+	0x00, /* 12 */	//Device Release Number BCD
+	0x00, /* 13 */	//Device Release Number BCD
+	0x00, /* 14 */	//Index of Manufacturer String Descriptor
+	0x00, /* 15 */	//Index of Product String Descriptor
+	0x00, /* 16 */	//Index of Serial Number String Descriptor
+	0x01 /* 17 */	//Number of Possible Configurations
 };
 
 void main(void)
@@ -98,6 +98,7 @@ void main(void)
 			UIF_BUS_RST = 0;
 		}
 		if (UIF_TRANSFER) {
+			//Check transaction on Endpoint 0
 			if ((USB_INT_ST & 0x0F) == 0x00) {
 				if (u8Buff[0] & 0x80) {
 					/* device to host */
@@ -116,13 +117,13 @@ void main(void)
 											u8Buff[i] = u8DeviceDescriptor[i];
 										}
 										UEP0_T_LEN = 0x12;
-										UEP0_CTRL = 0x80 | 0x40;
+										UEP0_CTRL = 0x80 | 0x40	//Send as DATA1. Receive DATA1.
 									} else {
 										for (i = 0; i < u8Buff[6]; ++i) {
 											u8Buff[i] = u8DeviceDescriptor[i];
 										}
 										UEP0_T_LEN = u8Buff[6];
-										UEP0_CTRL = 0x40;
+										UEP0_CTRL = 0x40;	//Send as DATA1
 									}
 									break;
 							}

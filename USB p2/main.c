@@ -25,10 +25,10 @@ void main(void)
 	uint8_t i;
 	
 	/* clock */
-	SAFE_MOD = 0x55;
-	SAFE_MOD = 0xAA;
-	CLOCK_CFG = 0x86;
-	SAFE_MOD = 0x00;
+	SAFE_MOD = 0x55;	//Enable safe mode step 1
+	SAFE_MOD = 0xAA;	//Enable safe mode step 2
+	CLOCK_CFG = 0x86;	//Bit 7: Int OSC; MASK_SYS_CK_SEL[2:0]: 110 Fpll/4: 24Mhz
+	SAFE_MOD = 0x00;	//Disable safe mode
 	
 	/* P1.4 */
 	/* Push-pull */
@@ -37,6 +37,7 @@ void main(void)
 	
 	P1 &= ~(1 << 4);
 	
+	/* Timer Configuration */
 	T2MOD |= (1 << 7);
 	T2MOD |= (1 << 4);
 	TMOD = 0x01;
@@ -48,7 +49,7 @@ void main(void)
 		delay_ms(500);
 	}
 	
-	USB_CTRL |= (1 << 5);
+	USB_CTRL |= (1 << 5); //Enable bUC_DEV_PU_EN bit 5 in SB Control Register (USB_CTRL)
 	
 	while (1) {
 		P1 |= (1 << 4);

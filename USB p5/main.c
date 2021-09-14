@@ -65,7 +65,7 @@ const uint8_t u8DeviceDescriptor[] = {
 	0x01 /* 17 */
 };
 
-uint8_t u8Address = 0;
+uint8_t u8Address = 0;	//Store Address
 
 void main(void)
 {
@@ -95,15 +95,15 @@ void main(void)
 		if (UIF_BUS_RST) {
 			P1_4 = 1;
 			P1_4 = 0;
-			USB_DEV_AD = 0;
-			u8Address = 0;
+			USB_DEV_AD = 0;	//Set Address
+			u8Address = 0;	//Address
 			UEP0_DMA = (uint16_t)u8Buff;
 			UEP0_CTRL = 0x02;
 			UIF_BUS_RST = 0;
 		}
 		if (UIF_TRANSFER) {
 			if ((USB_INT_ST & 0x0F) == 0x00) {
-				if ((USB_INT_ST & 0x30) == 0x30) {
+				if ((USB_INT_ST & 0x30) == 0x30) {	//Check OUT package or SETUP package
 					/* EP0 Setup */
 					if (u8Buff[0] & 0x80) {
 						/* device to host */
@@ -149,13 +149,13 @@ void main(void)
 								P1_4 = 0;
 								P1_4 = 1;
 								P1_4 = 0;
-								u8Address = u8Buff[2];
+								u8Address = u8Buff[2];	//Set address at status state with byte 2
 								UEP0_T_LEN = 0;
-								UEP0_CTRL = 0x40;
+								UEP0_CTRL = 0x40;	//Status state using DATA1
 								break;
 						}
 					}
-				} else if ((USB_INT_ST & 0x30) == 0x00) {
+				} else if ((USB_INT_ST & 0x30) == 0x00) {	//0x00 OUT package
 					/* EP0 out */
 					
 					P1_4 = 1;
@@ -166,7 +166,7 @@ void main(void)
 					P1_4 = 0;
 					P1_4 = 1;
 					P1_4 = 0;
-				} else if ((USB_INT_ST & 0x30) == 0x20) {
+				} else if ((USB_INT_ST & 0x30) == 0x20) {	//0x22 IN package
 					/* EP0 in */
 					P1_4 = 1;
 					P1_4 = 0;
@@ -175,8 +175,8 @@ void main(void)
 					P1_4 = 1;
 					P1_4 = 0;
 					if (u8Address) {
-						USB_DEV_AD = u8Address;
-						u8Address = 0;
+						USB_DEV_AD = u8Address;		//Assign new address for device
+						u8Address = 0;				//Clear address. Not re-assign
 					}
 				} else {
 					/* EP0 sof */

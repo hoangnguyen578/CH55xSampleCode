@@ -47,8 +47,8 @@ void send(uint8_t u8Data)
 const uint8_t u8DeviceDescriptor[] = {
 	0x12, /* 0 */
 	0x01, /* 1 */
-	0x00, /* 2 */
-	0x02, /* 3 */
+	0x00, /* 2 */	//USB2.0
+	0x02, /* 3 */	//USB2.0
 	0xff, /* 4 */
 	0x00, /* 5 */
 	0x00, /* 6 */
@@ -66,15 +66,15 @@ const uint8_t u8DeviceDescriptor[] = {
 };
 
 const uint8_t u8ConfigDescriptor[] = {
-	0x09,
-	0x02,
+	0x09,	//Size of Descriptor 9 bytes
+	0x02,	//Configuration Descriptor (0x02)
 	0x09,
 	0x00,
 	0x01,
 	0x01,
 	0x00,
 	0xC0,
-	0x32
+	0x32	//100mA=50units, one unit is 2mA 
 };
 
 uint8_t u8Address = 0;
@@ -184,7 +184,7 @@ void main(void)
 							USB_DEV_AD = u8Address;
 							u8Address = 0;
 						}
-						UEP0_CTRL = 0x40 | 0x02;
+						UEP0_CTRL = 0x40 | 0x02;	//Receive Data is enabled, Send Data is disabled
 					}
 				} else {
 					/* EP0 sof */

@@ -70,7 +70,7 @@ const uint8_t u8DeviceDescriptor[] = {
 const uint8_t u8ConfigDescriptor[] = {
 	0x09,
 	0x02,
-	0x20,
+	0x20,	//Length of all descriptors 32 bytes
 	0x00,
 	0x01,
 	0x01,
@@ -79,26 +79,26 @@ const uint8_t u8ConfigDescriptor[] = {
 	0x32,
 	/* interface */
 	0x09,
-	0x04,
-	0x00,
-	0x00,
+	0x04,	//Interface Descriptor (0x04)
+	0x00,	//Index of interface
+	0x00,	
 	0x02,
-	0xFF,
+	0xFF,	//Class Code
 	0xFF,
 	0xFF,
 	0x00,
 	/* endpoint out */
-	0x07,
-	0x05,
-	0x01,
-	0x02,
-	0x40,
-	0x00,
+	0x07,	//Size of Descriptor in Bytes (7 bytes)
+	0x05,	//Endpoint Descriptor (0x05)
+	0x01,	//In EP #1
+	0x02,	//Transfer Type 10 = Bulk
+	0x40,	//Maximum Packet Size this endpoint is capable of sending or receiving 0x0040 64bytes
+	0x00,	//Maximum Packet Size this endpoint is capable of sending or receiving 0x0040 64bytes
 	0x01,
 	/* endpoint in */
 	0x07,
 	0x05,
-	0x82,
+	0x82,	//Out EP #2
 	0x02,
 	0x40,
 	0x00,
@@ -203,15 +203,15 @@ void main(void)
 								UEP0_CTRL = 0x40;
 								break;
 							case 0x09:
-								UEP1_CTRL = (1 << 4) | (1 << 1);
-								UEP4_1_MOD |= (1 << 7);
-								UEP4_1_MOD &= ~(1 << 6);
-								UEP1_DMA = (uint16_t)u8Ep1Buff;
+								UEP1_CTRL = (1 << 4) | (1 << 1);	//Config EP1. Disable sending Data
+								UEP4_1_MOD |= (1 << 7);				//Receiving Data is Enabled
+								UEP4_1_MOD &= ~(1 << 6);			//Sending Data is Disabled
+								UEP1_DMA = (uint16_t)u8Ep1Buff;		//Assign data for Ep1Buffer
 								
-								UEP2_CTRL = (1 << 4) | (1 << 3) | (1 << 1);
-								UEP2_3_MOD |= (1 << 2);
-								UEP2_3_MOD &= ~(1 << 3);
-								UEP2_DMA = (uint16_t)u8Ep2Buff;
+								UEP2_CTRL = (1 << 4) | (1 << 3) | (1 << 1);		//Config EP1. Enable sending Data
+								UEP2_3_MOD |= (1 << 2);							//Tx Enabled
+								UEP2_3_MOD &= ~(1 << 3);						//Rx Disabled
+								UEP2_DMA = (uint16_t)u8Ep2Buff;					//Assign data for Ep1Buffer
 								u8ControlState = STATUS_STATE;
 								/* set config */
 								UEP0_T_LEN = 0;
@@ -237,29 +237,33 @@ void main(void)
 					/* EP0 sof */
 				}
 			} else if ((USB_INT_ST & 0x0F) == 0x01) {
-				/* ep1 */
-				if (u8Ep1Buff[0] == 1) {
+				/* ep1 */	//Receive Data in End point 1
+				if (u8Ep1Buff[0] == 1) {//Check data
 					P1_4 = 1;
 				} else if (u8Ep1Buff[0] == 2) {
 					P1_4 = 0;
 				} else if (u8Ep1Buff[0] == 3) {
 					P1_4 = 1;
 					P1_4 = 0;
-					u8Ep2Buff[0] = 0x14;
-					u8Ep2Buff[1] = 0x12;
-					u8Ep2Buff[2] = 0x19;
-					u8Ep2Buff[3] = 0x90;
-					UEP2_T_LEN = 0x40;
-					tmp = UEP2_CTRL;
-					tmp &= ~(1 << 1);
-					tmp &= ~(1 << 0);
+					u8Ep2Buff[0] = 0x14;	//Send Data to EP2
+					u8Ep2Buff[1] = 0x12;	//Send Data to EP2
+					u8Ep2Buff[2] = 0x19;	//Send Data to EP2
+					u8Ep2Buff[3] = 0x90;	//Send Data to EP2
+					u8Ep2Buff[4] = 0x05;	//Send Data to EP2
+					u8Ep2Buff[5] = 0x02;	//Send Data to EP2
+					u8Ep2Buff[6] = 0x19;	//Send Data to EP2
+					u8Ep2Buff[7] = 0x90;	//Send Data to EP2
+					UEP2_T_LEN = 0x40;		//Length of sending data: 64 bytes
+					tmp = UEP2_CTRL;		//Status of EP2
+					tmp &= ~(1 << 1);		//Turn on Send data
+					tmp &= ~(1 << 0);		//Turn on Send data
 					UEP2_CTRL = tmp;
 				}
 			} else if ((USB_INT_ST & 0x0F) == 0x02) {
-				/* ep2 */
+				/* ep2 */	//Data in End point 1
 				tmp = UEP2_CTRL;
-				tmp |= (1 << 1);
-				tmp &= ~(1 << 0);
+				tmp |= (1 << 1);			//Turn off Send data
+				tmp &= ~(1 << 0);			//Turn off Send data
 				UEP2_CTRL = tmp;
 			}
 			UIF_TRANSFER = 0;
